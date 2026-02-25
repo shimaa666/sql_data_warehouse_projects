@@ -1,0 +1,231 @@
+/*
+==================================================================================================
+DOL Script: Create Bronze Tables
+==================================================================================================
+Script Purpose:
+
+This script creates tables in the 'bronze' schema, dropping existing tables if they already exist.
+
+Run this script to re-define the DDL structure of 'bronze Tables
+==================================================================================================
+*/
+
+
+
+if object_id('bronze_crm_cust_info','u') is not null
+drop table bronze_crm_info;
+
+Create table bronze_crm_cust_info(
+cst_id int ,
+cst_key nvarchar(50),
+cst_firstname nvarchar(50),
+cst_lastname nvarchar(50),
+cst_marital_status nvarchar(50),
+cst_gndr nvarchar(50),
+cst_create_date Date
+
+);
+
+if object_id('bronze_crm_pre_info','u') is not null
+drop table bronze_crm_pre_info;
+
+Create table bronze_crm_pre_info(
+prd_id int,
+prd_key nvarchar(50),
+prd_nm nvarchar(50),
+prd_cost int,
+prd_line nvarchar(50),
+prd_start_dt datetime,
+prd_end_dt datetime
+
+);
+
+if object_id('bronze_crm_Sales_details','u') is not null
+drop table bronze_crm_Sales_details;
+
+Create table bronze_crm_Sales_details(
+sls_ord_num nvarchar(50),
+sls_prd_key nvarchar(50),
+sls_cust_id int ,
+sls_order_dt int,
+sls_ship_dt int,
+sls_due_dt int,
+sls_sales int,
+sls_quantity int,
+sls_price int
+
+);
+
+if object_id('bronze_erp_loc_a101','u') is not null
+drop table bronze_erp_loc_a101;
+
+Create table bronze_erp_loc_a101(
+CID nvarchar(50),
+CNTRY nvarchar(50)
+
+);
+
+if object_id('bronze_erp_cust_az12','u') is not null
+drop table bronze_erp_cust_az12;
+
+Create table bronze_erp_cust_az12(
+CID nvarchar(50),
+BDATE date,
+GEN nvarchar(50)
+);
+
+if object_id('bronze_erp_px_cat_g1v2','u') is not null
+drop table bronze_erp_px_cat_g1v2;
+
+Create table bronze_erp_px_cat_g1v2(
+ID nvarchar(50),
+CAT nvarchar(50),
+SUBCAT nvarchar(50),
+MAINTENANCE nvarchar(50)
+)
+
+
+
+exec  bronze.load_bronze
+create or alter procedure bronze.load_bronze as 
+begin
+   Declare @start_time datetime,@end_time datetime, @batch_start_time datetime,@batch_end_time datetime;
+   begin try
+        set @batch_start_time =getdate();
+		PRINT '======================================================';
+		print 'Loading Bronze Layer';
+		PRINT '======================================================';
+
+		print '------------------------------------------------------';
+		print 'Loding CRM Tables';
+		print '------------------------------------------------------';
+
+		set @start_time=getdate();
+		print'>>Truncating  Table :bronze_crm_cust_info';
+		truncate table bronze_crm_cust_info
+
+		print'>>Inserting data into:bronze_crm_cust_info';
+		Bulk insert bronze_crm_cust_info
+		from 'E:\data analysis (self study)\Sql\sql-data-warehouse-project-main\sql-data-warehouse-project-main\datasets\source_crm\cust_info.csv'
+		with
+		(
+		firstrow=2,
+		fieldterminator=',',
+		tablock
+		);
+		select * from bronze_crm_cust_info
+		set @end_time=getdate();
+		print '>>load duration:'+cast(datediff(second,@start_time,@end_time) as nvarchar)+'second';
+		print'>>-----------------'
+
+		set @start_time=getdate();
+		print'>>Truncating  Table :bronze_crm_pre_info';
+		truncate table bronze_crm_pre_info
+
+		print'>>Inserting data into:bronze_crm_pre_info';
+		Bulk insert bronze_crm_pre_info
+
+		from 'E:\data analysis (self study)\Sql\sql-data-warehouse-project-main\sql-data-warehouse-project-main\datasets\source_crm\prd_info.csv'
+		with
+		(
+		firstrow=2,
+		fieldterminator=',',
+		tablock
+		);
+		select * from bronze_crm_pre_info
+		set @end_time=getdate();
+		print '>>load duration:'+cast(datediff(second,@start_time,@end_time) as nvarchar)+'second';
+		print'>>-----------------'
+
+
+		print'>>Truncating  Table :bronze_crm_Sales_details';
+		truncate table bronze_crm_Sales_details
+
+		print'>>Inserting data into:bronze_crm_Sales_details';
+		Bulk insert bronze_crm_Sales_details
+		from 'E:\data analysis (self study)\Sql\sql-data-warehouse-project-main\sql-data-warehouse-project-main\datasets\source_crm\sales_details.csv'
+		with
+		(
+		firstrow=2,
+		fieldterminator=',',
+		tablock
+		);
+		select * from bronze_crm_Sales_details
+		set @end_time=getdate();
+		print '>>load duration:'+cast(datediff(second,@start_time,@end_time) as nvarchar)+'second';
+		print'>>-----------------'
+
+
+				print '------------------------------------------------------';
+				print 'Loding CRM Tables';
+				print '------------------------------------------------------';
+       
+	   set @start_time=getdate();
+		print'>>Truncating  Table :bronze_erp_loc_a101';
+		truncate table bronze_erp_loc_a101
+
+		print'>>Inserting data into:bronze_erp_loc_a101';
+		Bulk insert bronze_erp_loc_a101
+		from 'E:\data analysis (self study)\Sql\sql-data-warehouse-project-main\sql-data-warehouse-project-main\datasets\source_erp\LOC_A101.csv'
+		with
+		(
+		firstrow=2,
+		fieldterminator=',',
+		tablock
+		);
+		select * from bronze_erp_loc_a101
+		set @end_time=getdate();
+		print '>>load duration:'+cast(datediff(second,@start_time,@end_time) as nvarchar)+'second';
+		print'>>-----------------'
+
+		set @start_time=getdate();
+		print'>>Truncating  Table :bronze_erp_cust_az12';
+		truncate table bronze_erp_cust_az12
+
+		print'>>Inserting data into:bronze_erp_cust_az12';
+		Bulk insert bronze_erp_cust_az12
+		from 'E:\data analysis (self study)\Sql\sql-data-warehouse-project-main\sql-data-warehouse-project-main\datasets\source_erp\CUST_AZ12.csv'
+		with
+		(
+		firstrow=2,
+		fieldterminator=',',
+		tablock
+		);
+		select * from bronze_erp_cust_az12
+		set @end_time=getdate();
+		print '>>load duration:'+cast(datediff(second,@start_time,@end_time) as nvarchar)+'second';
+		print'>>-----------------'
+
+
+		set @start_time=getdate();
+		print'>>Truncating  Table :bronze_erp_px_cat_g1v2';
+		truncate table bronze_erp_px_cat_g1v2
+
+		print'>>Inserting data into:bronze_erp_px_cat_g1v2';
+		Bulk insert bronze_erp_px_cat_g1v2
+		from 'E:\data analysis (self study)\Sql\sql-data-warehouse-project-main\sql-data-warehouse-project-main\datasets\source_erp\PX_CAT_G1V2.csv'
+		with
+		(
+		firstrow=2,
+		fieldterminator=',',
+		tablock
+		);
+		select * from bronze_erp_px_cat_g1v2
+		set @end_time=getdate();
+		print '>>load duration:'+cast(datediff(second,@start_time,@end_time) as nvarchar)+'second';
+		print'>>-----------------';
+
+     set @batch_end_time =getdate();
+	print'==========================================';
+	print 'loding bronze layer complete';
+	print 'total load duration :'+datediff(second,@batch_start_time,@batch_end_time)+'second';
+	print'==========================================';
+	end try
+	begin catch
+	print 'ERROR OCCURED DURING LODING BRONZE LAYER';
+	PRINT'ERROR MESSAGE'+ERROR_MESSAGE();
+	PRINT'ERROR MESSAGE'+CAST(ERROR_NUMBER()AS NVARCHAR);
+	PRINT'ERROR MESSAGE'+CAST(ERROR_STATE()AS NVARCHAR);
+	end catch
+end  
+I
